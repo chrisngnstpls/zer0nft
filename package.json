@@ -1,6 +1,6 @@
 {
   "name": "zeronft",
-  "version": "1.3.0",
+  "version": "2.0.2",
   "description": "zero nft collector ",
   "main": "index.js",
   "scripts": {

@@ -1,26 +1,49 @@
+// import TezosToolkit from "tacos";
+import BeaconWallet from "svalet";
+
 
 (async function wal(){
-    //console.log(taquitoBeaconWallet.BeaconWallet)
-    const options = {
-    name: 'zer0nft',
-    preferredNetwork: "mainnet",
-    eventHandlers: {
-        PERMISSION_REQUEST_SUCCESS: {
-        handler: async (data) => {
-            console.log('permission data:', data);
-        },
-        },
-    },
-    };
-    const wallet = new taquitoBeaconWallet.BeaconWallet({name:'localWallet'});
 
-    // The Beacon wallet requires an extra step to set up the network to connect to and the permissions:
-    await wallet.requestPermissions({
-    network: {
-        type: 'mainnet',
-    },
-    });
+    let connButton = document.getElementById('walletConnect')
+    let balance, address
+    window.onload = () => {
+    connButton.addEventListener('click', e=>{
+        console.log('clicked')
+        initWallet()
+    })
 
-    const Tezos = new TezosToolkit('https://mainnet.api.tez.ie');
-    Tezos.setWalletProvider(wallet);
+    }
+
+    const initWallet = async () => {
+        try{
+            const Tezos = new TezosToolkit('https://mainnet-tezos.giganode.io')
+            const options = {
+                name: 'zer0nft',
+                iconUrl: 'https://tezostaquito.io/img/favicon.png',
+                preferredNetwork: "mainnet",
+                eventHandlers: {
+                  PERMISSION_REQUEST_SUCCESS: {
+                    handler: async (data) => {
+                      console.log('permission data:', data);
+                    },
+                  },
+                },
+              };
+            const wallet = new BeaconWallet(options)
+            const network = 'mainnet'
+            await wallet.requestPermissions({
+                network:{
+                    type:'mainnet'
+                }
+            })
+            Tezos.setWalletProvider(wallet)
+            address = wallet.permissions.address
+            balance = await Tezos.tz.getBalance(address)
+            console.log(address)
+
+        } catch(err){
+            console.log('error : ', err)
+        }
+    }
+
 })();
