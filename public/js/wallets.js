@@ -1,11 +1,8 @@
-// import TezosToolkit from "tacos";
-import BeaconWallet from "svalet";
-
 
 (async function wal(){
-
+    
     let connButton = document.getElementById('walletConnect')
-    let balance, address
+    let balance, address;
     window.onload = () => {
     connButton.addEventListener('click', e=>{
         console.log('clicked')
@@ -16,7 +13,7 @@ import BeaconWallet from "svalet";
 
     const initWallet = async () => {
         try{
-            const Tezos = new TezosToolkit('https://mainnet-tezos.giganode.io')
+            const Tezos = new taquito.TezosToolkit('https://mainnet-tezos.giganode.io')
             const options = {
                 name: 'zer0nft',
                 iconUrl: 'https://tezostaquito.io/img/favicon.png',
@@ -29,7 +26,7 @@ import BeaconWallet from "svalet";
                   },
                 },
               };
-            const wallet = new BeaconWallet(options)
+            const wallet = new BeaconWallet.BeaconWallet(options)
             const network = 'mainnet'
             await wallet.requestPermissions({
                 network:{

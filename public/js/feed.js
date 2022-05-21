@@ -79,11 +79,11 @@
         } else {
             _text = data.username + ": " + data.message + ` With price : ${data.price} $XTZ, ${data.editions} `
         }
-        console.log(axiosQuery)
+        //console.log(axiosQuery)
         axios.get(axiosQuery)
         // axios.get('https://api.better-call.dev/v1/tokens/mainnet/metadata?token_id=' + data.obid.toString())
             .then((response) => {
-                console.log('response :', response)
+                //console.log('response :', response)
                 let linkToObjkt = ''
                 let listItem = document.createElement('li')
                 if (data.price == 0){
@@ -97,9 +97,9 @@
                 let direct_uri = ''
                 let uriArray = []
                 //console.log(response.data)
-                console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
+                //console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
                 if( response.data[0]['artifact_uri'] == undefined) {
-                    console.log(`URI for objkt with ID: ${data.obid} came empty!`)
+                    //console.log(`URI for objkt with ID: ${data.obid} came empty!`)
                     direct_uri = ''
                     uriArray = ['','']
                 } else {
