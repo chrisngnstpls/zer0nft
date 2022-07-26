@@ -1,5 +1,4 @@
-
-// import {dAppClient, ConnectWallet, checkConnected, disconnect} from './twallets.js'
+import {dAppClient, ConnectWallet, checkConnected, disconnect} from './twallets.js'
 
 (function connect() {
 
