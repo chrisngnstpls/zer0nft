@@ -147,17 +147,16 @@ connection.on("operations", (msg) => {
     })
     let _msg = msg
     for (let key of Object.keys(_msg)){
-        //console.log(msg[key])
         for (let val of Object.values(msg[key])){
-            //console.log(val)
             if (val['parameter'].entrypoint == 'ask'){
-                
+                //console.log(val)
                 //console.log(val['parameter'])
-                //console.log(msg[key].value['key'].value['key'])
+
                 let price;
                 let actualPrice = Number(val['parameter'].value['amount']) /1000000
                 let thisContract = val['parameter'].value.token['address']
                 let thisTokenId = val['parameter'].value.token['token_id']
+                let ask_id = Number(val['storage'].next_ask_id) - 1
                 //let fa2Root = val['parameter'].value['fa2']
                 //console.log('actyualPrice', actualPrice)
                 
@@ -182,7 +181,7 @@ connection.on("operations", (msg) => {
                     let msssg = `Found a (near) zero OBJKT! at ${actualPrice} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`
                     if (watchObjkt == true){
                         //console.log('objectId from OBJKT : ', objktid)
-                        io.sockets.emit('receive_message', {message:_mesg, username:'OBJKT', obid:objktid, price:actualPrice, editions:editions, users:users.length, fa2:collectionAddress})
+                        io.sockets.emit('receive_message', {message:_mesg, username:'OBJKT', obid:objktid, price:actualPrice, editions:editions, users:users.length, ask_id:ask_id ,fa2:collectionAddress})
                     } else {
                         console.log('skipping objkt market')
                     }
@@ -196,7 +195,6 @@ connection.on("operations", (msg) => {
     }
 });
 connection2.on("operations", (msg) => {
-    //console.log(msg);
     var clients = io.sockets;
     var users = []
     clients.sockets.forEach(function(data,counter){
@@ -212,15 +210,24 @@ connection2.on("operations", (msg) => {
         //console.log("NOW RUNNING INSIDE CONNECTION 2 ASDADLAKJDALKDJALKDJALKSDJALKDJALKSDJALKDJ")
         //console.log(msg[key])
         for (let val of Object.values(msg[key])){
-            //console.log(val['parameter'])
+            //console.log(val)
+
             if (val['parameter'].entrypoint == 'swap'){
+                //console.log(val)
+                if(val['diffs']){
+                    for (let x of Object.values(val['diffs'])){
+                        //console.log('diffs : ', x.content.value['objkt_id'])
+                    } 
+                }
+                //console.log('hen contract : ', val['parameter'])
+                
                 let price;
-                let actualPrice = Number(val['parameter'].value['xtz_per_objkt'])
+                let actualPrice = Number(val['parameter'].value['xtz_per_objkt']) / 1000000
                 
                 if (actualPrice == 0){
                     price = 0
                 } else {
-                    price = Number(val['parameter'].value['xtz_per_objkt']) / 1000000
+                    price= actualPrice
                 }
                 
                 if(price <= _range){

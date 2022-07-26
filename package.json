@@ -12,8 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "@microsoft/signalr": "^5.0.10",
-    "@taquito/beacon-wallet": "^10.2.0",
-    "@taquito/taquito": "^10.2.0",
+    "@taquito/beacon-wallet": "^12.1.1",
+    "@taquito/taquito": "^12.1.1",
     "@temple-wallet/dapp": "^5.0.2",
     "colors": "^1.4.0",
     "cors": "^2.8.5",

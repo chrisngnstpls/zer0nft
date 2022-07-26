@@ -1,0 +1,97 @@
+//TEIA SAMPLE TRANSACTION BUY
+
+{
+  "branch": "BMJGSVfGRLK2AGSrKnrnyAhou6x1ZDZkiT3z8rLhZij3mkPQRY7",
+  "contents": [
+    {
+      "kind": "transaction",
+      "source": "tz1TVFSvAH7Yi2KVrmU3d99krJoMeWoqnvi6",
+      "fee": "1788",
+      "counter": "12244978",
+      "gas_limit": "14805",
+      "storage_limit": "350",
+      "amount": "70000",
+      "destination": "KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w",
+      "parameters": {
+        "entrypoint": "collect",
+        "value": {
+          "int": "62948"
+        }
+      }
+    }
+  ]
+}
+
+
+[
+  {
+    "destination": "KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w",
+    "kind": "transaction",
+    "source": "tz1TVFSvAH7Yi2KVrmU3d99krJoMeWoqnvi6",
+    "amount": 200000,
+    "parameters": {
+      "entrypoint": "collect",
+      "value": {
+        "int": "-365057"
+      }
+    }
+  }
+]
+///////////////////
+[
+  {
+    "destination": "KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w",
+    "kind": "transaction",
+    "source": "tz1TVFSvAH7Yi2KVrmU3d99krJoMeWoqnvi6",
+    "amount": 2000000,
+    "parameters": {
+      "entrypoint": "collect",
+      "value": {
+        "int": "737818"
+      }
+    }
+  }
+]
+
+{
+  "branch": "BLZKAwDBQYEZEBPDGA4dE2XTGAXjwtPgGo1occ7ip37W2mdymnS",
+  "contents": [
+    {
+      "kind": "transaction",
+      "source": "tz1TVFSvAH7Yi2KVrmU3d99krJoMeWoqnvi6",
+      "fee": "1788",
+      "counter": "12244978",
+      "gas_limit": "14806",
+      "storage_limit": "350",
+      "amount": "2000000",
+      "destination": "KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w",
+      "parameters": {
+        "entrypoint": "collect",
+        "value": {
+          "int": "69623"
+        }
+      }
+    }
+  ]
+}
+
+{
+  "error": [
+    {
+      "status": 500,
+      "statusText": "",
+      "body": "[{\"kind\":\"branch\",\"id\":\"proto.012-Psithaca.implicit.empty_implicit_contract\",\"implicit\":\"tz1Uw2SpDhvcarNNHHCMmSYko6CG5m8TbkN7\"}]",
+      "url": "https://mainnet-node.madfish.solutions/chains/main/blocks/head/helpers/scripts/run_operation",
+      "name": "HttpResponse",
+      "isError": true
+    },
+    {
+      "status": 500,
+      "statusText": "",
+      "body": "[{\"kind\":\"branch\",\"id\":\"proto.012-Psithaca.implicit.empty_implicit_contract\",\"implicit\":\"tz1Uw2SpDhvcarNNHHCMmSYko6CG5m8TbkN7\"}]",
+      "url": "https://mainnet-node.madfish.solutions/chains/main/blocks/head/helpers/scripts/run_operation",
+      "name": "HttpResponse",
+      "isError": true
+    }
+  ]
+}

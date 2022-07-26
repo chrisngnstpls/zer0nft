@@ -1,46 +1,44 @@
+// import { TezosToolkit } from "@taquito/taquito";
+// import { BeaconWallet } from "@taquito/beacon-wallet";
 
-(async function wal(){
-    
-    let connButton = document.getElementById('walletConnect')
-    let balance, address;
-    window.onload = () => {
-    connButton.addEventListener('click', e=>{
-        console.log('clicked')
-        initWallet()
-    })
+console.log(window)
+const Tezos = new taquito.TezosToolkit("https://mainnet-tezos.giganode.io");
+const wallet = new taquitoBeaconWallet.BeaconWallet({ name: "yosup" });
 
-    }
+Tezos.setWalletProvider(wallet);
 
-    const initWallet = async () => {
-        try{
-            const Tezos = new taquito.TezosToolkit('https://mainnet-tezos.giganode.io')
-            const options = {
-                name: 'zer0nft',
-                iconUrl: 'https://tezostaquito.io/img/favicon.png',
-                preferredNetwork: "mainnet",
-                eventHandlers: {
-                  PERMISSION_REQUEST_SUCCESS: {
-                    handler: async (data) => {
-                      console.log('permission data:', data);
-                    },
-                  },
-                },
-              };
-            const wallet = new BeaconWallet.BeaconWallet(options)
-            const network = 'mainnet'
-            await wallet.requestPermissions({
-                network:{
-                    type:'mainnet'
-                }
-            })
-            Tezos.setWalletProvider(wallet)
-            address = wallet.permissions.address
-            balance = await Tezos.tz.getBalance(address)
-            console.log(address)
+const address = await wallet.getPKH();
+if (!address) {
+  await wallet.requestPermissions();
+}
 
-        } catch(err){
-            console.log('error : ', err)
-        }
-    }
+// Connect to a specific contract on the tezos blockchain.
+// Make sure the contract is deployed on the network you requested permissions for.
+const contract = await Tezos.wallet.at(
+  "KT1CpeSQKdkhWi4pinYcseCFKmDhs5M74BkU" // For this example, we use the tzcolors contract on mainnet.
+);
 
-})();
+const TOKEN_ID = 0; // FA2 token id
+const recipient = address; // Send to ourself
+
+// Call a method on the contract. In this case, we use the transfer entrypoint.
+// Taquito will automatically check if the entrypoint exists and if we call it with the right parameters.
+// In this case the parameters are [from, to, amount].
+// This will prepare the contract call and send the request to the connected wallet.
+const result = await contract.methods
+  .transfer([
+    {
+      from_: address,
+      txs: [
+        {
+          to_: recipient,
+          token_id: TOKEN_ID,
+          amount: 1,
+        },
+      ],
+    },
+  ])
+  .send();
+
+// As soon as the operation is broadcast, you will receive the operation hash
+// return result.opHash;

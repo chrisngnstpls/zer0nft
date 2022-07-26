@@ -1,17 +1,61 @@
 
+import {dAppClient, ConnectWallet, checkConnected, disconnect} from './twallets.js'
+
 (function connect() {
 
+const objktContract = "KT1WvzYHCNBvDSdwafTHv7nJ1dWmZ8GCYuuC"
+const henContract = "KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w"
+const henNftContract = "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton"
+var myAddress=''
+let watchingObjkt = true;
+let watchingHen = true;
 
-    
-    let socket = io.connect('http://localhost:3000')
+let messageList = document.querySelector('#message-list');
+let newPrice = document.querySelector('#price');
+let objktWatcher = document.querySelector('#ObjktWatch');
+let HENWatcher = document.querySelector('#HENWatch');
+let connectWalletBtn = document.getElementById("connect-wallet")
+
+
+
+// var infoPopover = new bootstrap.Popover(document.querySelector('[data-bs-toggle="popover"'), {
+//     placement:'bottom',
+//     html:true,
+//     template : '<div class="popover" role="tooltip"><div class="popover-arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
+// })
+// connectWalletBtn.setAttribute('data-bs-content', `Address : ${acct.address}\nConnected on :${acct.network.type} \nPrice Threshold set : ${price}`)
+// infoPopover.setContent()
+
+
+window.onload = async function(){
+    // console.log('inside onload : ', infoPopover)
+    let connected = await checkConnected()
+    if(connected){
+        connectWalletBtn.textContent = 'Connected'
+
+        console.log('button content: ', connectWalletBtn.textContent)
+    } else {
+        connectWalletBtn.textContent = 'Connect Wallet'
+    }
+}
+connectWalletBtn.addEventListener('click', async () => {
+    if (connectWalletBtn.textContent == 'Connect Wallet'){
+        try{
+            await ConnectWallet()
+            connectWalletBtn.textContent = 'Connected'
+        } catch(err){
+            
+            console.log(err)
+        }
+    } else {
+        await disconnect()
+        console.log('run disconnect')
+        await checkConnected()
+        connectWalletBtn.textContent = 'Connect Wallet'
+    }
+})
+let socket = io.connect('http://localhost:3000')
     //let socket = io.connect('/')
-    let watchingObjkt = true;
-    let watchingHen = true;
-    let messageList = document.querySelector('#message-list');
-    let newPrice = document.querySelector('#price');
-    let objktWatcher = document.querySelector('#ObjktWatch');
-    let HENWatcher = document.querySelector('#HENWatch');
-
     setPriceBtn.addEventListener('click', e=> {
         if (newPrice.value == ''){
             newPrice.value = 1
@@ -51,6 +95,7 @@
     })
 
     socket.on('receive_message', data => {
+
         console.log('incoming objkt : ', data)
         let bcdString = 'https://api.better-call.dev/v1/tokens/mainnet/metadata'
         let axiosQuery = ''
@@ -60,11 +105,10 @@
         newAudio.volume = 0.2;      
         let firstRun = document.getElementById('mainBlock').attributes[0]
         
-        if (data.username == 'HicEtNunc'){
-            
-            axiosQuery = bcdString + '?token_id='+data.obid.toString()
+        if (data.username == 'HicEtNunc'){ 
+            axiosQuery = bcdString + '?contract=' +henNftContract.toString() + '&token_id='+data.obid.toString()
         } else if (data.username = 'OBJKT'){
-            //console.log('received ok objkt')
+            console.log(data.ask_id)
             axiosQuery = bcdString + '?contract=' + data.fa2.toString() + '&token_id=' + data.obid.toString()
         } else {
             console.log('Error bitchez')
@@ -98,12 +142,13 @@
                 let uriArray = []
                 //console.log(response.data)
                 //console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
-                if( response.data[0]['artifact_uri'] == undefined) {
-                    //console.log(`URI for objkt with ID: ${data.obid} came empty!`)
+                console.log('uri:', response.data[0])
+                if( response.data[0]['thumbnail_uri'] == undefined) {
+                    console.log(`URI for objkt with ID: ${data.obid} came empty!`)
                     direct_uri = ''
                     uriArray = ['','']
                 } else {
-                    direct_uri = response.data[0]['artifact_uri'] 
+                    direct_uri = response.data[0]['thumbnail_uri'] 
                     uriArray = direct_uri.split("//")
                 }
                 
@@ -113,16 +158,75 @@
                 if (data.username == 'OBJKT'){
                     linkToObjkt = 'https://objkt.com/asset/'+data.fa2+'/'+ data.obid
                 } else {
-                    linkToObjkt = 'https://hicetnunc.art/objkt/' + data.obid
+                    linkToObjkt = 'https://teia.art/objkt/' + data.obid
                 }
                 
                 buyButton.setAttribute('class', "btn btn-dark btn-sm")
-                buyButton.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
+                //buyButton.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
+                buyButton.addEventListener('click', e => {
+                    console.log('local Account : ', myAddress)
+                    // window.open(("'+linkToObjkt+'"))
+                    if (data.username == 'OBJKT') {
+                        console.log('ask id:', data.ask_id)
+                        let transPrice = data.price * 1000000
+                        let sentPrice = transPrice.toString()
+                        let askid = ''+data.ask_id
+                        transPrice.toString
+                        dAppClient.requestOperation({
+                            operationDetails:[
+                                {
+                                    kind:beacon.TezosOperationType.TRANSACTION,
+                                    source:myAddress,
+                                    destination: objktContract,
+                                    amount:sentPrice,
+                                    parameters:{
+                                        entrypoint:"fulfill_ask",
+                                        value:{
+                                            prim : "Pair",
+                                            args:[
+                                                {
+                                                    int:askid
+                                                },
+                                                {
+                                                    prim:"None"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        })
+                    } else if (data.username =='HicEtNunc'){
+                        let objktId = ''+data.obid
+                        let henPrice = data.price * 1000000
+                        //henPrice = ''+henPrice
+                        console.log(typeof(henPrice), henPrice)
+                        let testId = objktId - 663277
+                        
+                        dAppClient.requestOperation({
+                            operationDetails:[
+                                {
+                                   kind:beacon.TezosOperationType.TRANSACTION,
+                                   source:myAddress,
+                                   destination: henContract,
+                                   amount:henPrice,
+                                   parameters:{
+                                       entrypoint:'collect',
+                                       value:{
+                                           int:objktId
+                                       }
+                                    }
+                                }
+                            ]
+                        })                        
+                    }                                
+                })
                 buyButton.setAttribute('style', "padding : 5px")
                 buyButton.textContent = 'Buy now!'
                 listItem.innerHTML = _text + ` / ${response.data[0]['supply']} editions.  `
                 let thumb = document.createElement('img')
                 thumb.setAttribute('id', "source_thumbnail")
+                thumb.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
                 // let _thumbnail = document.querySelector('#source_thumbnail').src=(fullUri)
                 
                 //console.log(thumb)
