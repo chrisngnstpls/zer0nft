@@ -13,7 +13,7 @@ let watchObjkt = true;
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
 app.use(cors({
-    origin:'https://localhost:3000', // this was '*'
+    origin:'https://zer0nft.herokuapp.com', // this was '*'
     methods:['GET','POST'],
     credentials:true,
 }));
