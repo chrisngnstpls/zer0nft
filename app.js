@@ -13,7 +13,7 @@ let watchObjkt = true;
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
 app.use(cors({
-    origin:'*',
+    origin:'http://localhost:3000', // this was '*'
     methods:['GET','POST']
 }));
 
@@ -31,7 +31,7 @@ app.get('/about', (req,res)=>{
     res.render('about')
 })
 
-const server = app.listen(process.env.PORT || 3000, ()=>{
+const server = app.listen(3000, ()=>{ // || process.env.port
     console.log(`server is running on port : ${process.env.PORT}`)
 })
 
