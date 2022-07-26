@@ -1,6 +1,5 @@
 const signalR = require("@microsoft/signalr")
 const socket = require('socket.io')
-const cors = require('cors');
 const express = require('express')
 const app = express();
 
@@ -12,17 +11,13 @@ let watchObjkt = true;
 
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
-app.use(cors({
-    origin:'*', // this was '*'
-    methods:['GET','POST'],
-    credentials:true,
-}));
+
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", '*');
     res.header("Access-Control-Allow-Credentials", true);
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-    res.header("Access-Control-Allow-Headers", 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
+    res.header("Access-Control-Allow-Headers", 'Origin, X-Requested, Content-Type, Accept Authorization,application/json');
     next();
 });
 app.get('/', (req,res)=>{
@@ -32,7 +27,7 @@ app.get('/about', (req,res)=>{
     res.render('about')
 })
 
-const server = app.listen(3000, ()=>{ // || process.env.port
+const server = app.listen(3000 || process.env.PORT , ()=>{ // || process.env.port
     console.log(`server is running on port : ${process.env.PORT}`)
 })
 
