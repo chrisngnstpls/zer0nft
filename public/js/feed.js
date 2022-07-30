@@ -54,7 +54,7 @@ connectWalletBtn.addEventListener('click', async () => {
     }
 })
 
-let socket = io.connect('http://0.0.0.0:3000')
+let socket = io.connect(`http://0.0.0.0:${process.env.PORT}`)
     //let socket = io.connect('/')
     setPriceBtn.addEventListener('click', e=> {
         if (newPrice.value == ''){

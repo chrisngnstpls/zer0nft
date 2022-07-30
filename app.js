@@ -52,6 +52,7 @@ io.on('connection', socket => {
 
     // })
     socket.username = 'Anon';
+    socket.use_port = process.env.PORT;
     socket.priceRange = '1'
     socket.watchHen = true
     socket.watchObj = true
