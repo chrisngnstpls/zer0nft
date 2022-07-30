@@ -32,7 +32,7 @@ app.get('/about', (req,res)=>{
     res.render('about')
 })
 
-const server = app.listen(3000, ()=>{ // || process.env.port
+const server = app.listen(3000 || process.env.PORT, ()=>{ // || process.env.port
     console.log(`server is running on port : ${process.env.PORT}`)
 })
 
