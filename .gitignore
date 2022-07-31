@@ -2,7 +2,6 @@
 /public/js/external_wallets.js
 /public/librarian
 /public/taquito-10.2.0.tgz
-/views/.env
 /public/js/_feed.js
 /public/js/feed_v1_obsolete.js
 /node_modules
@@ -10,3 +9,4 @@
 /_app_bak.js
 /test.json
 /sampleResponse.json
+/_app_bak_.js

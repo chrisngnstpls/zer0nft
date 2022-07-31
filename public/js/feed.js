@@ -48,7 +48,7 @@ connectWalletBtn.addEventListener('click', async () => {
         }
     } else {
         await disconnect()
-        console.log('run disconnect')
+        //console.log('run disconnect')
         await checkConnected()
         connectWalletBtn.textContent = 'Connect Wallet'
     }
@@ -97,7 +97,7 @@ let socket = io.connect(HOST) //http://localhost:3000
 
     socket.on('receive_message', data => {
 
-        console.log('incoming objkt : ', data)
+        //console.log('incoming objkt : ', data)
         let bcdString = 'https://api.better-call.dev/v1/tokens/mainnet/metadata'
         let axiosQuery = ''
         let contract = ''
@@ -109,10 +109,10 @@ let socket = io.connect(HOST) //http://localhost:3000
         if (data.username == 'HicEtNunc'){ 
             axiosQuery = bcdString + '?contract=' +henNftContract.toString() + '&token_id='+data.obid.toString()
         } else if (data.username = 'OBJKT'){
-            console.log(data.ask_id)
+            //console.log(data.ask_id)
             axiosQuery = bcdString + '?contract=' + data.fa2.toString() + '&token_id=' + data.obid.toString()
         } else {
-            console.log('Error bitchez')
+            console.log('Error')
         }
         
         if (firstRun.value == 'card invisible'){
@@ -143,7 +143,7 @@ let socket = io.connect(HOST) //http://localhost:3000
                 let uriArray = []
                 //console.log(response.data)
                 //console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
-                console.log('uri:', response.data[0])
+                //console.log('uri:', response.data[0])
                 if( response.data[0]['thumbnail_uri'] == undefined) {
                     console.log(`URI for objkt with ID: ${data.obid} came empty!`)
                     direct_uri = ''
@@ -165,10 +165,10 @@ let socket = io.connect(HOST) //http://localhost:3000
                 buyButton.setAttribute('class', "btn btn-dark btn-sm")
                 //buyButton.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
                 buyButton.addEventListener('click', e => {
-                    console.log('local Account : ', myAddress)
+                    //console.log('local Account : ', myAddress)
                     // window.open(("'+linkToObjkt+'"))
                     if (data.username == 'OBJKT') {
-                        console.log('ask id:', data.ask_id)
+                        //console.log('ask id:', data.ask_id)
                         let transPrice = data.price * 1000000
                         let sentPrice = transPrice.toString()
                         let askid = ''+data.ask_id
@@ -200,9 +200,6 @@ let socket = io.connect(HOST) //http://localhost:3000
                     } else if (data.username =='HicEtNunc'){
                         let objktId = ''+data.obid
                         let henPrice = data.price * 1000000
-                        //henPrice = ''+henPrice
-                        console.log(typeof(henPrice), henPrice)
-                        let testId = objktId - 663277
                         
                         dAppClient.requestOperation({
                             operationDetails:[
@@ -229,13 +226,10 @@ let socket = io.connect(HOST) //http://localhost:3000
                 thumb.setAttribute('id', "source_thumbnail")
                 thumb.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
                 // let _thumbnail = document.querySelector('#source_thumbnail').src=(fullUri)
-                
-                //console.log(thumb)
                 thumb.src=(fullUri)
                 thumb.setAttribute('style', "width:3em; height:3em; padding:5px")
                 thumb.setAttribute('onerror', "this.src='/img/robber.png'")
-                // _thumbnail.setAttribute('style', "width:3em; height:3em; padding:5px")
-                // _thumbnail.setAttribute('onerror', "this.src='/img/robber.png'")
+
                 listItem.prepend(thumb)
                 listItem.append(buyButton)
                 listItem.classList.add('list-group-item')
