@@ -1,8 +1,11 @@
+require('dotenv').config()
 const signalR = require("@microsoft/signalr")
 const socket = require('socket.io')
 const cors = require('cors');
 const express = require('express')
 const app = express();
+var server_port = process.env.PORT || process.env.YOUR_PORT || 80;
+var server_host = process.env.HOST || '0.0.0.0'
 
 let _range = 1
 
@@ -32,8 +35,8 @@ app.get('/about', (req,res)=>{
     res.render('about')
 })
 
-const server = app.listen(3000 || process.env.PORT, ()=>{ // || process.env.port
-    console.log(`server is running on port : ${process.env.PORT}`)
+const server = app.listen(server_port, server_host, ()=>{ // || process.env.port
+    console.log(`server is running on port : %d`, server_port)
 })
 
 const io = socket(server, {'transports': ['websocket', 'polling'], allowEIO3: true});
