@@ -75,7 +75,6 @@ let socket = io.connect(HOST)
             console.log('Stopped watching objkt.com marketplace')
         }
     })
-
     HENWatcher.addEventListener('change', function(){
         if(this.checked) {
             watchingHen = true;
@@ -112,28 +111,32 @@ let socket = io.connect(HOST)
             newAudio.muted = true
         }
         let _text =''
-
+        //let textPrice = (Number(data.price)  / 1000000);
         if (data.price == 0) {
             _text = data.username + ": " + data.message + `OBJKT ID : ` + data.obid + `,  ${data.editions} `
         } else {
             _text = data.username + ": " + data.message + ` With price : ${data.textPrice} $XTZ, ${data.editions} `
         }
-
+        //console.log(axiosQuery)
         axios.get(axiosQuery)
+        // axios.get('https://api.better-call.dev/v1/tokens/mainnet/metadata?token_id=' + data.obid.toString())
             .then((response) => {
-                
-                let direct_uri = ''
-                let uriArray = []
+                //console.log('response :', response)
                 let linkToObjkt = ''
                 let listItem = document.createElement('li')
-                
                 if (data.price == 0){
                     listItem.setAttribute("class", "p-3 mb-2 bg-danger text-white")
                     newAudio.play();
                 } else {
                     listItem.setAttribute('class', "list-group-item list-group-item-light text-centered")
                 }
-
+                // console.log(response.data[0])
+                // console.log(response.data[0]['artifact_uri'])
+                let direct_uri = ''
+                let uriArray = []
+                //console.log(response.data)
+                //console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
+                //console.log('uri:', response.data[0])
                 if( response.data[0]['thumbnail_uri'] == undefined) {
                     console.log(`URI for objkt with ID: ${data.obid} came empty!`)
                     direct_uri = ''
@@ -153,10 +156,14 @@ let socket = io.connect(HOST)
                 }
                 
                 buyButton.setAttribute('class', "btn btn-dark btn-sm")
+                //buyButton.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
                 buyButton.addEventListener('click', e => {
+                    //console.log('local Account : ', myAddress)
+                    // window.open(("'+linkToObjkt+'"))
                     if (data.username == 'OBJKT') {
-                        
+                        //console.log('ask id:', data.ask_id)
                         let transPrice =data.price * 1000000
+                        // let sentPrice = transPrice.toString()
                         let sentPrice = String(transPrice)
                         let askid = ''+data.ask_id
 
@@ -217,13 +224,13 @@ let socket = io.connect(HOST)
                         })                        
                     }                                
                 })
-                
                 buyButton.setAttribute('style', "padding : 5px")
                 buyButton.textContent = 'Buy now!'
                 listItem.innerHTML = _text + ` / ${response.data[0]['supply']} editions.  `
                 let thumb = document.createElement('img')
                 thumb.setAttribute('id', "source_thumbnail")
                 thumb.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
+                // let _thumbnail = document.querySelector('#source_thumbnail').src=(fullUri)
                 thumb.src=(fullUri)
                 thumb.setAttribute('style', "width:3em; height:3em; padding:5px")
                 thumb.setAttribute('onerror', "this.src='/img/robber.png'")

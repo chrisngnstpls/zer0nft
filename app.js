@@ -202,21 +202,22 @@ connection2.on("operations", (msg) => {
     })
     let _msg = msg
     for (let key of Object.keys(_msg)){
+        //console.log("NOW RUNNING INSIDE CONNECTION 2 ASDADLAKJDALKDJALKDJALKSDJALKDJALKSDJALKDJ")
         //console.log(msg[key])
         for (let val of Object.values(msg[key])){
             //console.log(val)
 
             if (val['parameter'].entrypoint == 'swap'){
-                //console.log('found swap : ', val)
+                console.log('found swap : ', val)
 
                 //console.log('hen contract : ', val['parameter'])
                 let swapId = val['storage']['counter']
-                //console.log('swap Id', swapId)
+                console.log('swap Id', swapId)
                 let price = '';
                 let actualPrice = val['parameter'].value['xtz_per_objkt']
                 let comparePrice = actualPrice / 1000000
-                //console.log("price: ", actualPrice)
-                //console.log(typeof(actualPrice))
+                console.log("price: ", actualPrice)
+                console.log(typeof(actualPrice))
                 
                 if (actualPrice == 0){
                     price = 0;
@@ -251,3 +252,4 @@ connection2.on("operations", (msg) => {
 });
 
 init();
+//init2();
