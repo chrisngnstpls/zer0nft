@@ -8,6 +8,7 @@ var server_port = process.env.PORT || process.env.YOUR_PORT || 80;
 var server_host = process.env.HOST || '0.0.0.0'
 
 let _range = 1
+let _editions = 9999999999999999999
 
 let market = '';
 let watchHen = true;
@@ -64,6 +65,17 @@ io.on('connection', socket => {
         socket.priceRange = data.priceRange
         console.log(`User asked for new threshold : ${socket.priceRange}`)
         _range = data.priceRange
+    })
+
+    socket.on("change_editions", data => {
+        if(data.editions == 0){
+            socket.editions = 9999999999999999999999999999
+            _editions = 9999999999999999999999999999
+        } else if (data.editions != 0){
+            socket.editions = data.editions
+            _editions = data.editions
+        }    
+        console.log(`User asked for editions threshold : ${_editions} `)
     })
 
     socket.on('new_message', data => {
@@ -161,8 +173,9 @@ connection.on("operations", (msg) => {
                 let thisContract = val['parameter'].value.token['address']
                 let thisTokenId = val['parameter'].value.token['token_id']
                 let ask_id = Number(val['storage'].next_ask_id) - 1
-              
+
                 if(actualPrice <= _range){
+
                     let collectionAddress = thisContract
                     let objktid = thisTokenId
                     let editions = val['parameter'].value['editions']
@@ -214,8 +227,10 @@ connection2.on("operations", (msg) => {
                 let swapId = val['storage']['counter']
                 console.log('swap Id', swapId)
                 let price = '';
+                let editions = 0
                 let actualPrice = val['parameter'].value['xtz_per_objkt']
                 let comparePrice = actualPrice / 1000000
+                let nftEditions = val['parameter'].value['objkt_amount']
                 console.log("price: ", actualPrice)
                 console.log(typeof(actualPrice))
                 
@@ -226,8 +241,8 @@ connection2.on("operations", (msg) => {
                 }
                 
                 if(price <= _range){
-                    let objktid = val['parameter'].value['objkt_id']
                     let editions = val['parameter'].value['objkt_amount']
+                    let objktid = val['parameter'].value['objkt_id']
                     let _mesg = ''
                     if (price == 0){
                         _mesg = `Found a zer0 OBJKT!`
@@ -252,4 +267,3 @@ connection2.on("operations", (msg) => {
 });
 
 init();
-//init2();

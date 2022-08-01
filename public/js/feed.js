@@ -12,6 +12,7 @@ let watchingHen = true;
 
 let messageList = document.querySelector('#message-list');
 let newPrice = document.querySelector('#price');
+let newEditions = document.querySelector("#editions")
 let objktWatcher = document.querySelector('#ObjktWatch');
 let HENWatcher = document.querySelector('#HENWatch');
 let connectWalletBtn = document.getElementById("connect-wallet")
@@ -19,6 +20,8 @@ let connectWalletBtn = document.getElementById("connect-wallet")
 
 
 window.onload = async function(){
+    socket.editions = 99999999999999999999999999999999999
+    console.log(socket.editions)
     // console.log('inside onload : ', infoPopover)
     let connected = await checkConnected()
     if(connected){
@@ -63,6 +66,22 @@ let socket = io.connect(HOST)
             document.getElementById('mainBlock').setAttribute('class', 'visible')
         }  
     });
+
+    setEditionsBtn.addEventListener('click', e=> {
+        // let cleanEditions = 0
+        console.log('original editions : ', socket.editions)
+        console.log(`Setting editions to ${newEditions.value}`)
+        if (newEditions.value == '' || newEditions.value == 0){
+            socket.editions = 9999999999999999999999999999999
+            socket.emit('change_editions',{editions:socket.editions} )            
+
+        } else {
+            let cleanEditions = Math.abs(newEditions.value)
+            socket.editions = cleanEditions
+            socket.emit('change_editions',{editions:cleanEditions}) 
+        }
+        console.log(socket.editions)
+    })
 
     objktWatcher.addEventListener('change', function(){
         if(this.checked) {
@@ -122,123 +141,131 @@ let socket = io.connect(HOST)
         // axios.get('https://api.better-call.dev/v1/tokens/mainnet/metadata?token_id=' + data.obid.toString())
             .then((response) => {
                 //console.log('response :', response)
-                let linkToObjkt = ''
-                let listItem = document.createElement('li')
-                if (data.price == 0){
-                    listItem.setAttribute("class", "p-3 mb-2 bg-danger text-white")
-                    newAudio.play();
-                } else {
-                    listItem.setAttribute('class', "list-group-item list-group-item-light text-centered")
-                }
-                // console.log(response.data[0])
-                // console.log(response.data[0]['artifact_uri'])
-                let direct_uri = ''
-                let uriArray = []
-                //console.log(response.data)
-                //console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
-                //console.log('uri:', response.data[0])
-                if( response.data[0]['thumbnail_uri'] == undefined) {
-                    console.log(`URI for objkt with ID: ${data.obid} came empty!`)
-                    direct_uri = ''
-                    uriArray = ['','']
-                } else {
-                    direct_uri = response.data[0]['thumbnail_uri'] 
-                    uriArray = direct_uri.split("//")
-                }
+                let tokenSupply = response.data[0]['supply']
                 
-                let fullUri = 'https://ipfs.io/ipfs/' + uriArray[1] 
-                document.createElement('div')
-                let buyButton = document.createElement('button')
-                if (data.username == 'OBJKT'){
-                    linkToObjkt = 'https://objkt.com/asset/'+data.fa2+'/'+ data.obid
-                } else {
-                    linkToObjkt = 'https://teia.art/objkt/' + data.obid
-                }
+                //massive if statement coming
                 
-                buyButton.setAttribute('class', "btn btn-dark btn-sm")
-                //buyButton.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
-                buyButton.addEventListener('click', e => {
-                    //console.log('local Account : ', myAddress)
-                    // window.open(("'+linkToObjkt+'"))
-                    if (data.username == 'OBJKT') {
-                        //console.log('ask id:', data.ask_id)
-                        let transPrice =data.price * 1000000
-                        // let sentPrice = transPrice.toString()
-                        let sentPrice = String(transPrice)
-                        let askid = ''+data.ask_id
-
-                        dAppClient.requestOperation({
-                            operationDetails:[
-                                {
-                                    kind:beacon.TezosOperationType.TRANSACTION,
-                                    source:myAddress,
-                                    destination: objktContract,
-                                    amount:sentPrice,
-                                    parameters:{
-                                        entrypoint:"fulfill_ask",
-                                        value:{
-                                            prim : "Pair",
-                                            args:[
-                                                {
-                                                    int:askid
-                                                },
-                                                {
-                                                    prim:"None"
-                                                }
-                                            ]
+                if (tokenSupply <= socket.editions){
+                    //console.log(`user chose ${socket.editions} editions and token has ${tokenSupply} editions. page would appear`)
+                    let linkToObjkt = ''
+                    let listItem = document.createElement('li')
+                    if (data.price == 0){
+                        listItem.setAttribute("class", "p-3 mb-2 bg-danger text-white")
+                        newAudio.play();
+                    } else {
+                        listItem.setAttribute('class', "list-group-item list-group-item-light text-centered")
+                    }
+                    // console.log(response.data[0])
+                    // console.log(response.data[0]['artifact_uri'])
+                    let direct_uri = ''
+                    let uriArray = []
+                    //console.log(response.data)
+                    //console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
+                    //console.log('uri:', response.data[0])
+                    if( response.data[0]['thumbnail_uri'] == undefined) {
+                        console.log(`URI for objkt with ID: ${data.obid} came empty!`)
+                        direct_uri = ''
+                        uriArray = ['','']
+                    } else {
+                        direct_uri = response.data[0]['thumbnail_uri'] 
+                        uriArray = direct_uri.split("//")
+                    }
+                    
+                    let fullUri = 'https://ipfs.io/ipfs/' + uriArray[1] 
+                    document.createElement('div')
+                    let buyButton = document.createElement('button')
+                    if (data.username == 'OBJKT'){
+                        linkToObjkt = 'https://objkt.com/asset/'+data.fa2+'/'+ data.obid
+                    } else {
+                        linkToObjkt = 'https://teia.art/objkt/' + data.obid
+                    }
+                    
+                    buyButton.setAttribute('class', "btn btn-dark btn-sm")
+                    //buyButton.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
+                    buyButton.addEventListener('click', e => {
+                        //console.log('local Account : ', myAddress)
+                        // window.open(("'+linkToObjkt+'"))
+                        if (data.username == 'OBJKT') {
+                            //console.log('ask id:', data.ask_id)
+                            let transPrice =data.price * 1000000
+                            // let sentPrice = transPrice.toString()
+                            let sentPrice = String(transPrice)
+                            let askid = ''+data.ask_id
+    
+                            dAppClient.requestOperation({
+                                operationDetails:[
+                                    {
+                                        kind:beacon.TezosOperationType.TRANSACTION,
+                                        source:myAddress,
+                                        destination: objktContract,
+                                        amount:sentPrice,
+                                        parameters:{
+                                            entrypoint:"fulfill_ask",
+                                            value:{
+                                                prim : "Pair",
+                                                args:[
+                                                    {
+                                                        int:askid
+                                                    },
+                                                    {
+                                                        prim:"None"
+                                                    }
+                                                ]
+                                            }
                                         }
                                     }
-                                }
-                            ]
-                        })
-                    } if (data.username =='HicEtNunc'){
-
-                        function calculateId(_id){
-                            let inId = Number(_id) - 1
-                            return String(inId)
-                        }
-                        console.log('address : ', myAddress)
-                        console.log('swapid : ', calculateId(data.swapId))
-                        let swap_id = calculateId(data.swapId)
-                        // let henPrice =data.price
-                        // let _henPrice = String(henPrice)
-                        //let myPrice = new String(data.price)
-                        //console.log(typeof(myPrice))
-                        console.log(typeof(data.price))
-                        
-                        dAppClient.requestOperation({
-                            operationDetails:[
-                                {
-                                   kind:beacon.TezosOperationType.TRANSACTION,
-                                   destination: henContract,
-                                   amount:data.price,
-                                   storage_limit:"350",
-                                   parameters:{
-                                       entrypoint:"collect",
-                                       value:{
-                                           int:swap_id
-                                       }
+                                ]
+                            })
+                        } if (data.username =='HicEtNunc'){
+    
+                            function calculateId(_id){
+                                let inId = Number(_id) - 1
+                                return String(inId)
+                            }
+                            console.log('address : ', myAddress)
+                            console.log('swapid : ', calculateId(data.swapId))
+                            let swap_id = calculateId(data.swapId)
+                            // let henPrice =data.price
+                            // let _henPrice = String(henPrice)
+                            //let myPrice = new String(data.price)
+                            //console.log(typeof(myPrice))
+                            console.log(typeof(data.price))
+                            
+                            dAppClient.requestOperation({
+                                operationDetails:[
+                                    {
+                                       kind:beacon.TezosOperationType.TRANSACTION,
+                                       destination: henContract,
+                                       amount:data.price,
+                                       storage_limit:"350",
+                                       parameters:{
+                                           entrypoint:"collect",
+                                           value:{
+                                               int:swap_id
+                                           }
+                                        }
                                     }
-                                }
-                            ]
-                        })                        
-                    }                                
-                })
-                buyButton.setAttribute('style', "padding : 5px")
-                buyButton.textContent = 'Buy now!'
-                listItem.innerHTML = _text + ` / ${response.data[0]['supply']} editions.  `
-                let thumb = document.createElement('img')
-                thumb.setAttribute('id', "source_thumbnail")
-                thumb.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
-                // let _thumbnail = document.querySelector('#source_thumbnail').src=(fullUri)
-                thumb.src=(fullUri)
-                thumb.setAttribute('style', "width:3em; height:3em; padding:5px")
-                thumb.setAttribute('onerror', "this.src='/img/robber.png'")
+                                ]
+                            })                        
+                        }                                
+                    })
+                    buyButton.setAttribute('style', "padding : 5px")
+                    buyButton.textContent = 'Buy now!'
+                    listItem.innerHTML = _text + ` / ${response.data[0]['supply']} editions.  `
+                    let thumb = document.createElement('img')
+                    thumb.setAttribute('id', "source_thumbnail")
+                    thumb.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
+                    // let _thumbnail = document.querySelector('#source_thumbnail').src=(fullUri)
+                    thumb.src=(fullUri)
+                    thumb.setAttribute('style', "width:3em; height:3em; padding:5px")
+                    thumb.setAttribute('onerror', "this.src='/img/robber.png'")
+    
+                    listItem.prepend(thumb)
+                    listItem.append(buyButton)
+                    listItem.classList.add('list-group-item')
+                    messageList.prepend(listItem)
+                }
 
-                listItem.prepend(thumb)
-                listItem.append(buyButton)
-                listItem.classList.add('list-group-item')
-                messageList.prepend(listItem)
             
             }).catch (function(err) {
                 console.log('error encountered! Keeping on.', err)

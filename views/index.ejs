@@ -23,7 +23,12 @@
         <div class="input-group mb-3">
             <input type="number" onkeyup="if(this.value<0){this.value= this.value * -1}" class="form-control" id="price" min = "0" max = '100000000000' placeholder="Enter threshold to begin, default = 1" aria-label="Price Threshold" aria-describedby="basic-addon2">
             <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="button" id="setPriceBtn">Update</button>
+              <button class="btn btn-outline-secondary" type="button" id="setPriceBtn">Price</button>
+            </div>
+            <div style="padding: 10px;"></div>
+            <input type="number" onkeyup="if(this.value<0){this.value= this.value * -1}" class="form-control" id="editions" min = "0" max = '100000000000' placeholder="Enter editions, default = 0 for all" aria-label="Editions" aria-describedby="basic-addon2">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" id="setEditionsBtn">Editions</button>
             </div>
           </div>
           <div class="container" id='checkboxesForm'>
