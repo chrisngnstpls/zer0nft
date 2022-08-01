@@ -1,9 +1,31 @@
+// my error
 [
   {
-    "destination": "KT1FvqJwEDWb1Gwc55Jd1jjTHRVWbYKUUpyq",
+    "destination": "KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w",
     "kind": "transaction",
-    "amount": 7980000,
-    "storageLimit": "310",
-    "parameters": { "entrypoint": "fulfill_ask", "value": { "int": "313122" } }
+    "amount": 37000000,
+    "storageLimit": "350",
+    "parameters": {
+      "entrypoint": "collect",
+      "value": {
+        "int": "113786"
+      }
+    }
   }
 ]
+// proper
+[
+  {
+    "destination": "KT1PHubm9HtyQEJ4BBpMTVomq6mhbfNZ9z5w",
+    "kind": "transaction",
+    "amount": 37000000,
+    "storageLimit": "350",
+    "parameters": {
+      "entrypoint": "collect",
+      "value": {
+        "int": "113784"
+      }
+    }
+  }
+]
+https://teia.art/objkt/746985

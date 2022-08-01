@@ -40,6 +40,15 @@ async function checkConnected(){
     return err
   }
 }
+
+async function getMyAddress(){
+  try{
+    const myAdd = await dAppClient.getActiveAccount();
+    return myAdd
+  } catch (err){
+    console.log(err)
+  }
+}
 async function disconnect(){
   try{
     await dAppClient.clearActiveAccount()
@@ -58,7 +67,7 @@ async function disconnect(){
 }
 
 
-export {dAppClient, ConnectWallet, checkConnected, disconnect}
+export {dAppClient, ConnectWallet, checkConnected, disconnect, getMyAddress}
 
 
 
