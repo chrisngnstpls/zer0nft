@@ -15,7 +15,7 @@ let newPrice = document.querySelector('#price');
 let objktWatcher = document.querySelector('#ObjktWatch');
 let HENWatcher = document.querySelector('#HENWatch');
 let connectWalletBtn = document.getElementById("connect-wallet")
-var HOST = location.origin.replace(/^http/, 'ws')
+
 
 
 window.onload = async function(){
@@ -46,7 +46,7 @@ connectWalletBtn.addEventListener('click', async () => {
     }
 })
 
-
+var HOST = location.origin.replace(/^http/, 'ws')
 let socket = io.connect(HOST)
 
     setPriceBtn.addEventListener('click', e=> {
