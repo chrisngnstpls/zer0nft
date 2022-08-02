@@ -1,12 +1,9 @@
-// import { DAppClient, TezosOperationType } from "@airgap/beacon-sdk";
 
 const dAppClient = new beacon.DAppClient({ name: "zer0Nft" });
 
 
 
 // This code should be called every time the page is loaded or refreshed to see if the user has already connected to a wallet.
-
-
 
 
 async function ConnectWallet(){
@@ -69,21 +66,3 @@ async function disconnect(){
 
 export {dAppClient, ConnectWallet, checkConnected, disconnect, getMyAddress}
 
-
-
-
-
-
-// console.log(window)
-// At this point we are connected to an account.
-// Let's send a simple transaction to the wallet that sends 1 mutez to ourselves.
-// const response = await dAppClient.requestOperation({
-//   operationDetails: [
-//     {
-//       kind: beacon.TezosOperationType.TRANSACTION,
-//       destination: myAddress, // Send to ourselves
-//       amount: "1", // Amount in mutez, the smallest unit in Tezos
-//     },
-//   ],
-// });
-// console.log("Operation Hash: ", response.transactionHash);

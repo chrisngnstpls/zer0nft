@@ -28,4 +28,42 @@
     }
   }
 ]
-https://teia.art/objkt/746985
+https: //teia.art/objkt/746985
+{
+  "error": [
+    {
+      "errors": [
+        {
+          "kind": "temporary",
+          "id": "proto.013-PtJakart.contract.balance_too_low",
+          "contract": "tz1TVFSvAH7Yi2KVrmU3d99krJoMeWoqnvi6",
+          "balance": "33999145",
+          "amount": "295000000"
+        }
+      ],
+      "errorDetails": "Error occurred during estimation",
+      "name": "TezosOperationError",
+      "id": "proto.013-PtJakart.contract.balance_too_low",
+      "kind": "temporary",
+      "message": "(temporary) proto.013-PtJakart.contract.balance_too_low",
+      "isError": true
+    },
+    {
+      "errors": [
+        {
+          "kind": "temporary",
+          "id": "proto.013-PtJakart.contract.balance_too_low",
+          "contract": "tz1TVFSvAH7Yi2KVrmU3d99krJoMeWoqnvi6",
+          "balance": "33999145",
+          "amount": "295000000"
+        }
+      ],
+      "errorDetails": "Error occurred during estimation",
+      "name": "TezosOperationError",
+      "id": "proto.013-PtJakart.contract.balance_too_low",
+      "kind": "temporary",
+      "message": "(temporary) proto.013-PtJakart.contract.balance_too_low",
+      "isError": true
+    }
+  ]
+}

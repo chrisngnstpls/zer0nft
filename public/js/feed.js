@@ -16,6 +16,7 @@ let newEditions = document.querySelector("#editions")
 let objktWatcher = document.querySelector('#ObjktWatch');
 let HENWatcher = document.querySelector('#HENWatch');
 let connectWalletBtn = document.getElementById("connect-wallet")
+let usersOnline = document.getElementById("usersOnline")
 
 
 
@@ -53,13 +54,20 @@ var HOST = location.origin.replace(/^http/, 'ws')
 let socket = io.connect(HOST)
 
     setPriceBtn.addEventListener('click', e=> {
-        if (newPrice.value == ''){
-            newPrice.value = 1
-        }
+        
+        let sanitizedValue = 0
+        
+        if (newPrice.value == '' || newPrice.value == 0){
+            socket.threshold = 0
+        } else if(newPrice.value > 0){
+            sanitizedValue  =Math.abs(newPrice.value)
+            socket.threshold = sanitizedValue
+        } 
+
         console.log(`New price threshold @ ${newPrice.value} `)
-        let sanityValue = Math.abs(newPrice.value)
-        socket.emit('change_range', {priceRange : sanityValue} )
-        newPrice.value = sanityValue
+
+        socket.emit('change_range', {priceRange : socket.threshold} )
+        
         let firstRun = document.getElementById('mainBlock').attributes[0]
         
         if (firstRun.value == 'card invisible'){
@@ -68,8 +76,7 @@ let socket = io.connect(HOST)
     });
 
     setEditionsBtn.addEventListener('click', e=> {
-        // let cleanEditions = 0
-        console.log('original editions : ', socket.editions)
+        //console.log('original editions : ', socket.editions)
         console.log(`Setting editions to ${newEditions.value}`)
         if (newEditions.value == '' || newEditions.value == 0){
             socket.editions = 9999999999999999999999999999999
@@ -80,7 +87,6 @@ let socket = io.connect(HOST)
             socket.editions = cleanEditions
             socket.emit('change_editions',{editions:cleanEditions}) 
         }
-        console.log(socket.editions)
     })
 
     objktWatcher.addEventListener('change', function(){
@@ -106,13 +112,16 @@ let socket = io.connect(HOST)
         }
     })
 
+    socket.on('users_update', data => {
+        console.log(data.users)
+        usersOnline.innerHTML = `${data.users} users online.`
+    })
+
     socket.on('receive_message', data => {
 
         //console.log('incoming objkt : ', data)
         let bcdString = 'https://api.better-call.dev/v1/tokens/mainnet/metadata'
         let axiosQuery = ''
-        let contract = ''
-        let itemId = ''
         var newAudio = new Audio('sound/ding.mp3');
         newAudio.volume = 0.2;      
         let firstRun = document.getElementById('mainBlock').attributes[0]
@@ -129,24 +138,24 @@ let socket = io.connect(HOST)
         if (firstRun.value == 'card invisible'){
             newAudio.muted = true
         }
+
         let _text =''
-        //let textPrice = (Number(data.price)  / 1000000);
+        console.log(`object price ${data.price} from ${data.username}`)
+        let textPrice = (Number(data.price)  / 1000000);
         if (data.price == 0) {
             _text = data.username + ": " + data.message + `OBJKT ID : ` + data.obid + `,  ${data.editions} `
         } else {
             _text = data.username + ": " + data.message + ` With price : ${data.textPrice} $XTZ, ${data.editions} `
         }
-        //console.log(axiosQuery)
+
         axios.get(axiosQuery)
-        // axios.get('https://api.better-call.dev/v1/tokens/mainnet/metadata?token_id=' + data.obid.toString())
             .then((response) => {
                 //console.log('response :', response)
                 let tokenSupply = response.data[0]['supply']
                 
                 //massive if statement coming
                 
-                if (tokenSupply <= socket.editions){
-                    //console.log(`user chose ${socket.editions} editions and token has ${tokenSupply} editions. page would appear`)
+                if ((tokenSupply <= socket.editions) && (data.textPrice <= socket.threshold)){
                     let linkToObjkt = ''
                     let listItem = document.createElement('li')
                     if (data.price == 0){
@@ -155,13 +164,8 @@ let socket = io.connect(HOST)
                     } else {
                         listItem.setAttribute('class', "list-group-item list-group-item-light text-centered")
                     }
-                    // console.log(response.data[0])
-                    // console.log(response.data[0]['artifact_uri'])
                     let direct_uri = ''
                     let uriArray = []
-                    //console.log(response.data)
-                    //console.log('artifact uri :' , response.data[0]['thumbnail_uri'])
-                    //console.log('uri:', response.data[0])
                     if( response.data[0]['thumbnail_uri'] == undefined) {
                         console.log(`URI for objkt with ID: ${data.obid} came empty!`)
                         direct_uri = ''
@@ -181,72 +185,68 @@ let socket = io.connect(HOST)
                     }
                     
                     buyButton.setAttribute('class', "btn btn-dark btn-sm")
-                    //buyButton.setAttribute('onclick', 'window.open("'+linkToObjkt+'");')
                     buyButton.addEventListener('click', e => {
-                        //console.log('local Account : ', myAddress)
-                        // window.open(("'+linkToObjkt+'"))
                         if (data.username == 'OBJKT') {
-                            //console.log('ask id:', data.ask_id)
-                            let transPrice =data.price * 1000000
-                            // let sentPrice = transPrice.toString()
-                            let sentPrice = String(transPrice)
-                            let askid = ''+data.ask_id
-    
-                            dAppClient.requestOperation({
-                                operationDetails:[
-                                    {
-                                        kind:beacon.TezosOperationType.TRANSACTION,
-                                        source:myAddress,
-                                        destination: objktContract,
-                                        amount:sentPrice,
-                                        parameters:{
-                                            entrypoint:"fulfill_ask",
-                                            value:{
-                                                prim : "Pair",
-                                                args:[
-                                                    {
-                                                        int:askid
-                                                    },
-                                                    {
-                                                        prim:"None"
-                                                    }
-                                                ]
+                            try{
+                                let askid = ''+data.ask_id    
+                                dAppClient.requestOperation({
+                                    operationDetails:[
+                                        {
+                                            kind:beacon.TezosOperationType.TRANSACTION,
+                                            source:myAddress,
+                                            destination: objktContract,
+                                            amount:`${data.price}`,
+                                            storage_limit:"350",
+                                            parameters:{
+                                                entrypoint:"fulfill_ask",
+                                                value:{
+                                                    prim : "Pair",
+                                                    args:[
+                                                        {
+                                                            int:askid
+                                                        },
+                                                        {
+                                                            prim:"None"
+                                                        }
+                                                    ]
+                                                }
                                             }
                                         }
-                                    }
-                                ]
-                            })
-                        } if (data.username =='HicEtNunc'){
-    
-                            function calculateId(_id){
-                                let inId = Number(_id) - 1
-                                return String(inId)
+                                    ]
+                                })
+                            } catch(err){
+                                alert(err)
                             }
-                            console.log('address : ', myAddress)
-                            console.log('swapid : ', calculateId(data.swapId))
-                            let swap_id = calculateId(data.swapId)
-                            // let henPrice =data.price
-                            // let _henPrice = String(henPrice)
-                            //let myPrice = new String(data.price)
-                            //console.log(typeof(myPrice))
-                            console.log(typeof(data.price))
-                            
-                            dAppClient.requestOperation({
-                                operationDetails:[
-                                    {
-                                       kind:beacon.TezosOperationType.TRANSACTION,
-                                       destination: henContract,
-                                       amount:data.price,
-                                       storage_limit:"350",
-                                       parameters:{
-                                           entrypoint:"collect",
-                                           value:{
-                                               int:swap_id
-                                           }
+
+                        } if (data.username =='HicEtNunc'){
+                            try{
+                                
+                                function calculateId(_id){
+                                    let inId = Number(_id) - 1
+                                    return String(inId)
+                                }
+
+                                let swap_id = calculateId(data.swapId)   
+                                dAppClient.requestOperation({
+                                    operationDetails:[
+                                        {
+                                           kind:beacon.TezosOperationType.TRANSACTION,
+                                           destination: henContract,
+                                           amount:data.price,
+                                           storage_limit:"350",
+                                           parameters:{
+                                               entrypoint:"collect",
+                                               value:{
+                                                   int:swap_id
+                                               }
+                                            }
                                         }
-                                    }
-                                ]
-                            })                        
+                                    ]
+                                }) 
+                            } catch(err){
+                                alert(err)
+                            }
+                       
                         }                                
                     })
                     buyButton.setAttribute('style', "padding : 5px")

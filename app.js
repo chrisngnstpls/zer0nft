@@ -14,6 +14,7 @@ let market = '';
 let watchHen = true;
 let watchObjkt = true;
 
+
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
 app.use(cors({
@@ -41,20 +42,40 @@ const server = app.listen(server_port, server_host, ()=>{ // || process.env.port
 })
 
 const io = socket(server, {'transports': ['websocket', 'polling'], allowEIO3: true});
+var allUsers = [];
+
+
+function User(_id, _userName, _userPort,_priceRange,_isConnected){
+    this.id = _id
+    this.userPort = _userPort
+    this.isConnected = _isConnected
+}
+function sanitizeArray(_arr){
+    //console.log('init array : ', _arr)
+    const ids = _arr.map(u => u.id)
+    const filtered = _arr.filter(({id}, index) => !ids.includes(id, index+1))
+    //console.log('final array : ', filtered)
+    return filtered
+}
+
 
 io.on('connection', socket => {
     console.log('User online!')
-    // var clients = io.sockets;
-    // var users = []
-    // clients.sockets.forEach(function(data,counter){
-    //     // var socketid = data.id;
-    //     // var isConnected = data.connected;
-    //     if (data.id && data.connected){
-    //         users.push(data.id)
-    //         console.log(`${users.length} users connected.`)
-    //     }
-
-    // })
+    
+    var clients = io.sockets;
+    
+    clients.sockets.forEach(function(data,counter){
+        // var socketid = data.id;
+        // var isConnected = data.connected;
+        //console.log(data)
+        if (data.id && data.connected){
+            //console.log(users)
+            let _user = new User(data.id, process.env.PORT, data.connected )
+            allUsers.push(_user)   
+        }
+    })
+    allUsers = sanitizeArray(allUsers)
+    io.sockets.emit('users_update', {users:allUsers.length})
     socket.username = 'Anon';
     socket.use_port = process.env.PORT;
     socket.priceRange = '1'
@@ -104,7 +125,15 @@ io.on('connection', socket => {
         }
         //console.log('watch hen: ', socket.watchHen, 'watch objkt: ', socket.watchObj)
     })
+    socket.on('disconnect', (data) =>{
+        
+        allUsers = sanitizeArray(allUsers)
+        allUsers.pop()
+        console.log(`User disconnected, ${allUsers.length} online.`)
+        io.sockets.emit('users_update', {users:allUsers.length})
+    })
 });
+
 
 const connection = new signalR.HubConnectionBuilder()
     .withUrl("https://api.tzkt.io/v1/events")
@@ -168,34 +197,29 @@ connection.on("operations", (msg) => {
             if (val['parameter'].entrypoint == 'ask'){
                 //console.log(val)
                 //console.log(val['parameter'])
-
+                
+                let objktPrice = val['parameter'].value['amount']
                 let actualPrice = Number(val['parameter'].value['amount']) / 1000000
                 let thisContract = val['parameter'].value.token['address']
                 let thisTokenId = val['parameter'].value.token['token_id']
                 let ask_id = Number(val['storage'].next_ask_id) - 1
-
-                if(actualPrice <= _range){
-
-                    let collectionAddress = thisContract
-                    let objktid = thisTokenId
-                    let editions = val['parameter'].value['editions']
-                    let _mesg = ''
-                    if (actualPrice == 0){
-                        _mesg = `Found a zer0 OBJKT!`
-                    } else {
-                        _mesg = `Found a (near) zer0 OBJKT!`
-                    }
-                    //console.log(`Found a (near) zero OBJKT! at ${actualPrice} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`)
-                    let msssg = `Found a (near) zero OBJKT! at ${actualPrice} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`
-                    if (watchObjkt == true){
-                        //console.log('objectId from OBJKT : ', objktid)
-                        io.sockets.emit('receive_message', {message:_mesg, username:'OBJKT', obid:objktid, price:actualPrice, textPrice:actualPrice ,editions:editions, users:users.length, ask_id:ask_id ,fa2:collectionAddress})
-                    } else {
-                        console.log('skipping objkt market')
-                    }
-                    
+                let collectionAddress = thisContract
+                let objktid = thisTokenId
+                let editions = val['parameter'].value['editions']
+                let _mesg = ''
+                if (actualPrice == 0){
+                    _mesg = `Found a zer0 OBJKT!`
                 } else {
-                    console.log('skipped')
+                    _mesg = `Found a (near) zer0 OBJKT!`
+                }
+                //console.log(`Found a (near) zero OBJKT! at ${actualPrice} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`)
+                let msssg = `Found a (near) zero OBJKT! at ${actualPrice} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`
+                if (watchObjkt == true){
+                    
+                    //console.log('objectId from OBJKT : ', objktid)
+                    io.sockets.emit('receive_message', {message:_mesg, username:'OBJKT', obid:objktid, price:objktPrice, textPrice:actualPrice ,editions:editions, users:users.length, ask_id:ask_id ,fa2:collectionAddress})
+                } else {
+                    console.log('skipping objkt market')
                 }
             }
         }
@@ -215,50 +239,37 @@ connection2.on("operations", (msg) => {
     })
     let _msg = msg
     for (let key of Object.keys(_msg)){
-        //console.log("NOW RUNNING INSIDE CONNECTION 2 ASDADLAKJDALKDJALKDJALKSDJALKDJALKSDJALKDJ")
-        //console.log(msg[key])
+
         for (let val of Object.values(msg[key])){
             //console.log(val)
 
             if (val['parameter'].entrypoint == 'swap'){
-                console.log('found swap : ', val)
 
-                //console.log('hen contract : ', val['parameter'])
                 let swapId = val['storage']['counter']
-                console.log('swap Id', swapId)
                 let price = '';
-                let editions = 0
-                let actualPrice = val['parameter'].value['xtz_per_objkt']
-                let comparePrice = actualPrice / 1000000
-                let nftEditions = val['parameter'].value['objkt_amount']
-                console.log("price: ", actualPrice)
-                console.log(typeof(actualPrice))
+                let actualPrice = val['parameter'].value['xtz_per_objkt'] 
+                let textPrice = Number(actualPrice) / 1000000
                 
                 if (actualPrice == 0){
                     price = 0;
                 } else {
-                    price = comparePrice
+                    price = actualPrice
                 }
-                
-                if(price <= _range){
-                    let editions = val['parameter'].value['objkt_amount']
-                    let objktid = val['parameter'].value['objkt_id']
-                    let _mesg = ''
-                    if (price == 0){
-                        _mesg = `Found a zer0 OBJKT!`
-                    } else {
-                        _mesg = `Found a (near) zer0 OBJKT!`
-                    }
-                    //console.log(`Found a (near) zero OBJKT! at ${price} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`)
-                    let msssg = `Found a (near) zero OBJKT! at ${price} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`
-                    if(watchHen == true){
-                        console.log('objectId from HEN : ', objktid)
-                        io.sockets.emit('receive_message', {message:_mesg, username:'HicEtNunc', obid:objktid, price:actualPrice, textPrice:comparePrice,editions:editions, users:users.length, swapId:swapId})
-                    } else {
-                        console.log('skipping hen marketplace')
-                    }
-                    
+                let editions = val['parameter'].value['objkt_amount']
+                let objktid = val['parameter'].value['objkt_id']
+                let _mesg = ''
+                if (price == 0){
+                    _mesg = `Found a zer0 OBJKT!`
+                } else {
+                    _mesg = `Found a (near) zer0 OBJKT!`
+                }
+                //console.log(`Found a (near) zero OBJKT! at ${price} $XTZ, with OBJKT ID : ${objktid}, for #${editions} editions.`)
 
+                if(watchHen == true){
+                    console.log('objectId from HEN : ', objktid)
+                    io.sockets.emit('receive_message', {message:_mesg, username:'HicEtNunc', obid:objktid, price:actualPrice, textPrice:textPrice ,editions:editions, users:users.length, swapId:swapId})
+                } else {
+                    console.log('skipping hen marketplace')
                 }
             }
         }
