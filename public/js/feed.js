@@ -22,8 +22,6 @@ let usersOnline = document.getElementById("usersOnline")
 
 window.onload = async function(){
     socket.editions = 99999999999999999999999999999999999
-    console.log(socket.editions)
-    // console.log('inside onload : ', infoPopover)
     let connected = await checkConnected()
     if(connected){
         connectWalletBtn.textContent = 'Connected'
@@ -113,7 +111,7 @@ let socket = io.connect(HOST)
     })
 
     socket.on('users_update', data => {
-        console.log(data.users)
+        //console.log(data.users)
         usersOnline.innerHTML = `${data.users} users online.`
     })
 
@@ -140,7 +138,7 @@ let socket = io.connect(HOST)
         }
 
         let _text =''
-        console.log(`object price ${data.price} from ${data.username}`)
+        //console.log(`object price ${data.price} from ${data.username}`)
         let textPrice = (Number(data.price)  / 1000000);
         if (data.price == 0) {
             _text = data.username + ": " + data.message + `OBJKT ID : ` + data.obid + `,  ${data.editions} `
